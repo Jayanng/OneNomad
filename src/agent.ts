@@ -200,20 +200,21 @@ async function syncPositionsFromChain(pools: PoolInfo[]): Promise<boolean> {
 }
 
 async function initPositions(pools: PoolInfo[]): Promise<void> {
-  if (globalAgentPositions.size > 0) {
-    // Ensure any newly discovered pools start at 0%
+  // Check if we already have real (non-zero) positions — skip re-sync only then
+  const hasRealPositions = [...globalAgentPositions.values()].some(v => v > 0);
+  if (hasRealPositions) {
     for (const pool of pools) {
       if (!globalAgentPositions.has(pool.id)) globalAgentPositions.set(pool.id, 0);
     }
     return;
   }
 
-  // 1. Try to sync from on-chain position object
+  // Always attempt chain sync if no real positions yet (retries on every cycle until successful)
   const synced = await syncPositionsFromChain(pools);
   if (synced) return;
 
-  // 2. Fallback to 0 if no on-chain data (cold start or RPC error)
-  console.warn(`[agent] ⚠ Could not synchronise with on-chain Position object. Defaulting to 0% allocation to prevent rebalance errors.`);
+  // Fallback to 0 — will retry next cycle
+  console.warn(`[agent] ⚠ Could not synchronise with on-chain Position object — will retry next cycle.`);
   for (const pool of pools) globalAgentPositions.set(pool.id, 0);
 }
 
