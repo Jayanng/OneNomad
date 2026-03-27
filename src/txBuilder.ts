@@ -11,6 +11,9 @@ import type { AIDecision, PoolInfo, TxResult } from "./types";
 const POSITION_OBJECT   = process.env.POSITION_OBJECT_ID   ?? "0x0";
 const SWAP_POOL_OBJECT  = process.env.SWAP_POOL_OBJECT_ID  ?? "0x0"; // Shared swap pool for OCT/USDC etc
 const GAS_BUDGET        = parseInt(process.env.GAS_BUDGET_MIST ?? "10000000", 10); // 0.01 OCT
+// Deposit amount split from gas on each rebalance (1_000_000 MIST = 0.001 OCT).
+// Must be large enough for the contract to register a non-zero position entry.
+const DEPOSIT_AMOUNT_MIST = parseInt(process.env.DEPOSIT_AMOUNT_MIST ?? "1000000", 10);
 
 // ── Keypair ───────────────────────────────────────────────────────────────────
 
@@ -122,14 +125,14 @@ async function buildPTB(
     const OCT_TYPE = "0x2::oct::OCT";
     if (target.tokenA === OCT_TYPE) {
       // OCT is the gas coin — use tx.gas directly to avoid "no valid gas coins" conflict
-      const [splitCoin] = tx.splitCoins(tx.gas, [tx.pure.u64(100)]);
+      const [splitCoin] = tx.splitCoins(tx.gas, [tx.pure.u64(DEPOSIT_AMOUNT_MIST)]);
       depositArg = splitCoin as any;
     } else {
       const coins = await client.getCoins({ owner: senderStr, coinType: target.tokenA });
       if (coins.data.length === 0) {
         throw new Error(`Cannot simulate swap: no ${target.tokenA} coins found in wallet ${senderStr}`);
       }
-      const [splitCoin] = tx.splitCoins(tx.object(coins.data[0].coinObjectId), [tx.pure.u64(100)]);
+      const [splitCoin] = tx.splitCoins(tx.object(coins.data[0].coinObjectId), [tx.pure.u64(DEPOSIT_AMOUNT_MIST)]);
       depositArg = splitCoin as any;
     }
   }
