@@ -60,8 +60,8 @@ const POOL_REGISTRY: PoolRegistryEntry[] = [
     protocol: "OneDEX",
     tier: "established",
     label: "OneDEX USDC/USDT",
-    tokenA: USDC,
-    tokenB: USDT,
+    tokenA: OCT,
+    tokenB: USDC,
   },
 ];
 
