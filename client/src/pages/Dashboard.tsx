@@ -207,14 +207,14 @@ export default function Dashboard() {
     setScanCountdown(cycleIntervalRef.current);
   }, [pools]);
 
-  // Tick countdown down while WS is connected
+  // Tick countdown down only while agent is running
   useEffect(() => {
-    if (!wsConnected) return;
+    if (!wsConnected || !autonomousMode) return;
     const timer = setInterval(() => {
       setScanCountdown((c) => Math.max(0, c - 1));
     }, 1000);
     return () => clearInterval(timer);
-  }, [wsConnected]);
+  }, [wsConnected, autonomousMode]);
 
   // "X s ago" ticker — seconds since last apyUpdate landed
   const [secsSinceUpdate, setSecsSinceUpdate] = useState<number | null>(null);
@@ -1193,7 +1193,7 @@ export default function Dashboard() {
                   <h3 className="text-sm font-headline font-bold uppercase tracking-widest text-on-surface">Agent Brain</h3>
                 </div>
                 <div className="flex items-center gap-3">
-                  {wsConnected && (
+                  {wsConnected && autonomousMode && (
                     <div className="flex items-center gap-2.5">
                       <span className="text-[9px] font-label text-cyan-400/70 uppercase tracking-widest">
                         Next scan: {scanCountdown}s
@@ -1227,7 +1227,7 @@ export default function Dashboard() {
                 </div>
               </div>
               {/* Live scanning ticker */}
-              {wsConnected && (
+              {wsConnected && autonomousMode && (
                 <div className="flex items-center gap-2 px-4 py-2 border-b border-outline-variant/5 bg-zinc-950/60">
                   <span className="flex gap-0.5">
                     {[0, 150, 300].map((d) => (
