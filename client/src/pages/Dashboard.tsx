@@ -257,9 +257,18 @@ export default function Dashboard() {
   };
 
   const TOUR_STEPS = 4;
-  const [logs, setLogs] = useState<{ time: string; msg: string; type: string }[]>([
-    { time: "--:--:--", msg: "[INFO] Connecting to OneNomad agent…", type: "INFO" },
-  ]);
+  const [logs, setLogs] = useState<{ time: string; msg: string; type: string }[]>(() => {
+    try {
+      const saved = localStorage.getItem("onenomad_brain_logs");
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return [{ time: "--:--:--", msg: "[INFO] Connecting to OneNomad agent…", type: "INFO" }];
+  });
+
+  // Persist logs to localStorage so they survive navigation and page refresh
+  useEffect(() => {
+    try { localStorage.setItem("onenomad_brain_logs", JSON.stringify(logs)); } catch {}
+  }, [logs]);
 
   // Feed useAgentWS events into the terminal log
   const prevPoolsLenRef = useRef(0);
