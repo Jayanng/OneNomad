@@ -36,7 +36,7 @@ export class Database {
     }
     if (!this.config) {
       this.config = {
-        threshold: 1.5,
+        threshold: 0.5,
         dryRun: false,
         isRunning: true,
       };
