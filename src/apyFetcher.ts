@@ -134,7 +134,7 @@ function getMockForPool(entry: PoolRegistryEntry): PoolInfo {
   const idx = POOL_REGISTRY.indexOf(entry);
   const safeIdx = idx >= 0 ? idx : 0;
 
-  const base = [15, 5, 12, 30, 8][safeIdx % 5];
+  const base = [12, 14, 11, 15, 13][safeIdx % 5];
   const variance = ((seed * (safeIdx + 1) * 11) % 1500) / 100; // max 14.99% variance
   const apy = parseFloat((base + variance).toFixed(2));
 
