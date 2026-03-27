@@ -357,8 +357,6 @@ async function runAgentCycle(): Promise<void> {
     });
 
     if (txResult.success) {
-      applyRebalanceToPositions(decision);
-      broadcastPositions(pools);
       console.log(`[agent] ✓ PTB ${DRY_RUN ? "simulated" : "executed"} successfully.`);
       if (txResult.digest) {
         const explorerUrl = `https://onescan.cc/testnet/tx/${txResult.digest}`;
@@ -370,6 +368,11 @@ async function runAgentCycle(): Promise<void> {
           console.log(`[agent] │  Gas     : ${txResult.gasUsed}`);
         }
         console.log(`[agent] └─────────────────────────────────────────────────────────`);
+        // Re-sync positions from chain now that the tx is confirmed — keeps
+        // in-memory state consistent with on-chain reality so the next PTB
+        // uses the correct version of the Position object.
+        await syncPositionsFromChain(pools);
+        broadcastPositions(pools);
         // Verify on-chain events
         const events = await monitor.getTransactionEvents(txResult.digest);
         events.forEach(ev => {
@@ -382,12 +385,18 @@ async function runAgentCycle(): Promise<void> {
           });
         });
       } else {
-        // Dry-run — no digest
+        // Dry-run — no digest; use in-memory math (no chain state changed)
+        applyRebalanceToPositions(decision);
+        broadcastPositions(pools);
         console.log(`[agent] ✓ Dry-run simulation complete — no digest (funds not moved).`);
         if (txResult.gasUsed) console.log(`[agent] Gas (simulated): ${txResult.gasUsed}`);
       }
     } else {
       console.error(`[agent] ✗ PTB failed: ${txResult.error}`);
+      // Clear in-memory positions so the next cycle re-syncs from chain.
+      // Prevents stale allocations (wrong source pool / old object version).
+      globalAgentPositions.clear();
+      console.warn(`[agent] Position cache cleared after PTB failure — next cycle will re-sync from chain.`);
     }
 
     // Persist rebalance history for dashboard access
