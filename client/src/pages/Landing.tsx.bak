@@ -1,0 +1,352 @@
+// FILE: client/src/pages/Landing.tsx
+import { Link } from "react-router-dom";
+import { useOneWallet } from "../hooks/useOneWallet";
+import { useOneID, shortenAddress } from "../hooks/useOneID";
+
+export default function Landing() {
+  const { isConnected, address } = useOneWallet();
+  const { name: oneIdName } = useOneID(address);
+  const displayName = oneIdName ?? (address ? shortenAddress(address) : null);
+  return (
+    <div className="font-body selection:bg-primary-container selection:text-on-primary-container overflow-x-hidden bg-[#131313] text-[#e5e2e1]">
+      {/* TopNavBar Navigation Shell */}
+      <nav className="fixed top-0 w-full z-50 bg-[#131313]/70 backdrop-blur-md border-b border-[#3a494b]/20 shadow-[0_0_20px_rgba(0,243,255,0.05)]">
+        <div className="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto">
+          <div className="text-2xl font-bold tracking-tighter text-[#00f3ff] uppercase font-headline drop-shadow-[0_0_8px_rgba(0,243,255,0.6)]">
+            OneNomad
+          </div>
+          <div className="hidden md:flex items-center gap-8 font-headline tracking-tight">
+            <Link className="text-[#00f3ff] font-bold border-b-2 border-[#00f3ff] pb-1" to="/">Ecosystem</Link>
+            <Link className="text-[#b9cacb] hover:text-[#00f3ff] transition-colors" to="/hunter-stats">Hunter Stats</Link>
+            <Link className="text-[#b9cacb] hover:text-[#00f3ff] transition-colors" to="/security">Security</Link>
+            <Link className="text-[#b9cacb] hover:text-[#00f3ff] transition-colors" to="/docs">Docs</Link>
+          </div>
+          <div className="flex items-center gap-4">
+            {isConnected && displayName && (
+              <div className="hidden lg:flex items-center gap-2 px-3 py-1 bg-surface-container rounded-full border border-outline-variant/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-secondary-fixed-dim"></span>
+                <span className="text-[10px] font-label text-cyan-300 uppercase tracking-widest">{displayName}</span>
+              </div>
+            )}
+            <Link to="/dashboard">
+              <button className="bg-gradient-to-br from-primary-container to-primary-fixed-dim text-on-primary px-6 py-2 rounded-md font-bold tracking-tight hover:shadow-[0_0_15px_#00f3ff] transition-all active:scale-95 duration-100">
+                Launch OneNomad
+              </button>
+            </Link>
+          </div>
+        </div>
+      </nav>
+
+      {/* Main Content Canvas */}
+      <main className="relative pt-24">
+        {/* Hero Section */}
+        <section className="relative h-[calc(100vh-6rem)] flex items-center px-6 overflow-hidden">
+          {/* Particle Network Background */}
+          <div className="absolute inset-0 -z-10 overflow-hidden">
+            <div className="neural-grid absolute inset-0 opacity-20"></div>
+            {/* Ambient glow */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[500px] bg-[#00f3ff]/5 rounded-full blur-[140px]"></div>
+            {/* Floating particles */}
+            {(
+              [
+                [12, 8,  3, 0  ], [28, 82, 2, 1.2], [62, 4,  2, 0.8], [78, 92, 3, 2.1],
+                [42, 48, 2, 1.5], [8,  58, 2, 0.3], [88, 28, 3, 1.8], [52, 72, 2, 0.6],
+                [32, 18, 2, 2.3], [68, 43, 3, 1.0], [18, 94, 2, 0.5], [92, 12, 2, 1.7],
+                [55, 35, 3, 0.9], [22, 65, 2, 2.6], [72, 78, 2, 0.2], [45, 90, 2, 1.4],
+              ] as [number, number, number, number][]
+            ).map(([top, left, size, delay], i) => (
+              <div
+                key={i}
+                className="absolute rounded-full bg-[#00f3ff]"
+                style={{
+                  top: `${top}%`,
+                  left: `${left}%`,
+                  width: `${size}px`,
+                  height: `${size}px`,
+                  opacity: 0.45,
+                  animationName: "pulse",
+                  animationDuration: `${4.5 + delay}s`,
+                  animationDelay: `${delay}s`,
+                  animationTimingFunction: "ease-in-out",
+                  animationIterationCount: "infinite",
+                  boxShadow: `0 0 ${size * 4}px #00f3ff`,
+                }}
+              />
+            ))}
+          </div>
+
+          <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center py-6 md:py-10">
+            {/* Left: Copy */}
+            <div className="lg:col-span-7 space-y-5 z-10">
+
+              {/* Live badge */}
+              <div className="inline-flex items-center gap-2 bg-[#00f3ff]/5 border border-[#00f3ff]/20 px-4 py-1.5 rounded-full shadow-[0_0_12px_rgba(0,243,255,0.08)]">
+                <span className="w-2 h-2 rounded-full bg-[#00f3ff] hunter-pulse shadow-[0_0_6px_#00f3ff]"></span>
+                <span className="text-xs font-label uppercase tracking-widest text-[#00f3ff]/80">Live on OneChain Testnet</span>
+                <span className="material-symbols-outlined text-[#00f3ff]/40 text-sm">arrow_forward</span>
+              </div>
+
+              {/* Main Headline */}
+              <div>
+                <p className="text-base md:text-lg font-headline font-medium tracking-widest uppercase text-on-surface-variant/50 mb-2">
+                  Autonomous Yield Intelligence
+                </p>
+                <h1 className="text-4xl md:text-6xl font-headline font-bold leading-[1.0] tracking-tighter">
+                  <span className="text-on-surface">Set it.</span>{" "}
+                  <span className="text-on-surface/60">Forget it.</span>
+                  <br />
+                  <span
+                    className="italic"
+                    style={{
+                      background: "linear-gradient(90deg, #00f3ff 0%, #a5f3fc 50%, #00f3ff 100%)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                      filter: "drop-shadow(0 0 18px rgba(0,243,255,0.4))",
+                    }}
+                  >
+                    Let AI hunt the best
+                    <br className="hidden md:block" /> yields on OneChain.
+                  </span>
+                </h1>
+              </div>
+
+              {/* Tagline */}
+              <p className="text-base md:text-lg text-on-surface-variant max-w-xl leading-relaxed">
+                OneNomad's autonomous agent scans pools, decides with{" "}
+                <span className="text-[#00f3ff] font-semibold">Groq AI</span>, and rebalances with{" "}
+                <span className="inline-flex items-center gap-1 text-[#00f3ff] font-semibold">
+                  <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span>zero gas
+                </span>{" "}
+                — 24/7, while you sleep.
+              </p>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-wrap gap-4 pt-1">
+                <Link to="/dashboard">
+                  <button className="group relative bg-gradient-to-br from-[#00f3ff] to-[#0891b2] text-[#0a1628] px-8 py-3.5 rounded-md font-bold text-base hover:shadow-[0_0_32px_rgba(0,243,255,0.6)] transition-all active:scale-95 duration-150 flex items-center gap-2 overflow-hidden">
+                    <span className="relative z-10">Launch OneNomad</span>
+                    <span className="material-symbols-outlined text-lg relative z-10 group-hover:translate-x-1 transition-transform">rocket_launch</span>
+                    <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  </button>
+                </Link>
+                <button className="group border border-[#00f3ff]/25 hover:border-[#00f3ff]/50 bg-[#00f3ff]/5 hover:bg-[#00f3ff]/10 text-[#00f3ff]/70 hover:text-[#00f3ff] px-8 py-3.5 rounded-md font-bold text-base backdrop-blur-md transition-all flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full border border-[#00f3ff]/40 flex items-center justify-center text-xs group-hover:border-[#00f3ff]/80 transition-colors">▶</span>
+                  Watch 60-second Demo
+                </button>
+              </div>
+
+              {/* Trust bar */}
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                {[
+                  { icon: "bolt",          label: "Zero Gas"           },
+                  { icon: "verified_user", label: "Move-Secure"        },
+                  { icon: "psychology",    label: "Groq + OneChain"    },
+                  { icon: "emoji_events",  label: "Built for OneHack 3.0", highlight: true },
+                ].map((item) => (
+                  <span
+                    key={item.label}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-label uppercase tracking-widest border transition-colors
+                      ${item.highlight
+                        ? "bg-[#00f3ff]/10 border-[#00f3ff]/30 text-[#00f3ff] shadow-[0_0_10px_rgba(0,243,255,0.15)]"
+                        : "bg-surface-container-low border-outline-variant/15 text-on-surface-variant/50 hover:text-on-surface-variant/80 hover:border-outline-variant/30"
+                      }`}
+                  >
+                    <span className="material-symbols-outlined text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>{item.icon}</span>
+                    {item.label}
+                  </span>
+                ))}
+              </div>
+
+            </div>
+
+            {/* Right: Holographic Orb */}
+            <div className="lg:col-span-5 relative flex justify-center items-center h-[500px]">
+              <div className="absolute w-[400px] h-[400px] bg-primary-container/20 rounded-full blur-[120px] animate-pulse"></div>
+              <div className="relative w-80 h-80 border-2 border-primary-container/30 rounded-full flex items-center justify-center p-8 animate-[spin_20s_linear_infinite]">
+                <div className="w-full h-full border-2 border-secondary-fixed-dim/40 rounded-full border-dashed animate-[spin_25s_linear_infinite_reverse]"></div>
+              </div>
+              <div className="absolute flex flex-col items-center gap-4">
+                <span className="material-symbols-outlined text-8xl text-primary-container glow-text" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  deployed_code
+                </span>
+                <div className="text-center">
+                  <span className="font-headline font-bold text-sm tracking-[0.4em] uppercase text-primary-container/80 block">Autonomous Shell</span>
+                  <span className="font-label text-xs text-on-surface-variant flex items-center justify-center gap-1 mt-2">
+                    <span className="w-1.5 h-1.5 bg-secondary-fixed-dim rounded-full animate-pulse"></span>
+                    Syncing...
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Stats Section (HUD Style) */}
+        <section className="max-w-7xl mx-auto px-6 mb-32">
+          {/* Quick Stats — visible on first scroll */}
+          <div className="flex flex-wrap gap-8 py-8 mb-8 border-b border-outline-variant/10">
+            {[
+              { value: "+184%", label: "avg yield generated" },
+              { value: "47",    label: "rebalances today" },
+              { value: "312",   label: "users protected" },
+            ].map((stat) => (
+              <div key={stat.label}>
+                <div className="text-2xl font-headline font-bold text-[#00f3ff]">{stat.value}</div>
+                <div className="text-xs font-label uppercase tracking-wider text-on-surface-variant mt-0.5">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-surface-container-lowest border-t border-outline-variant/20 p-8 rounded-md hover:bg-surface-container transition-colors group">
+              <p className="text-xs font-label uppercase text-on-surface-variant mb-2 group-hover:text-primary-container transition-colors">Total Yield Generated</p>
+              <h3 className="text-4xl font-headline font-bold text-on-surface">$421.8M</h3>
+            </div>
+            <div className="bg-surface-container-lowest border-t border-outline-variant/20 p-8 rounded-md hover:bg-surface-container transition-colors group">
+              <p className="text-xs font-label uppercase text-on-surface-variant mb-2 group-hover:text-secondary-fixed-dim transition-colors">Active Hunters</p>
+              <h3 className="text-4xl font-headline font-bold text-on-surface">14.2K</h3>
+            </div>
+            <div className="bg-surface-container-lowest border-t border-outline-variant/20 p-8 rounded-md hover:bg-surface-container transition-colors group">
+              <p className="text-xs font-label uppercase text-on-surface-variant mb-2 group-hover:text-primary-container transition-colors">Supported Protocols</p>
+              <h3 className="text-4xl font-headline font-bold text-on-surface">12+</h3>
+            </div>
+            <div className="bg-surface-container-lowest border-t border-outline-variant/20 p-8 rounded-md hover:bg-surface-container transition-colors group">
+              <p className="text-xs font-label uppercase text-on-surface-variant mb-2 group-hover:text-secondary-fixed-dim transition-colors">Avg. APY</p>
+              <h3 className="text-4xl font-headline font-bold text-on-surface">18.4%</h3>
+            </div>
+          </div>
+        </section>
+
+        {/* The Hunter's Journey (How it Works) */}
+        <section className="bg-surface-container-low py-32 px-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
+              <div className="max-w-2xl">
+                <h2 className="text-4xl md:text-6xl font-headline font-bold tracking-tight mb-6">Execution <span className="text-secondary-fixed-dim">Pipeline</span></h2>
+                <p className="text-on-surface-variant text-lg">Our Move-based smart agents operate with sub-millisecond latency to capture fleeting yield opportunities across the ecosystem.</p>
+              </div>
+              <div className="flex items-center gap-4 text-on-surface-variant font-label text-sm uppercase tracking-widest">
+                <span>Step 01-03</span>
+                <div className="w-12 h-[1px] bg-outline-variant"></div>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Step 1 */}
+              <div className="group relative overflow-hidden p-8 bg-surface-container rounded-md border border-outline-variant/10 hover:border-primary-container/30 transition-all duration-500">
+                <div className="absolute -top-4 -right-4 text-8xl font-headline font-black text-surface-container-highest opacity-10 select-none">01</div>
+                <div className="mb-8 w-14 h-14 rounded-lg bg-surface-container-high flex items-center justify-center">
+                  <span className="material-symbols-outlined text-primary-container text-3xl">radar</span>
+                </div>
+                <h4 className="text-2xl font-headline font-bold mb-4">Deep Scan</h4>
+                <p className="text-on-surface-variant leading-relaxed">Continuous monitoring of 1,200+ liquidity pools, lending rates, and arbitrage vectors across all major DEXs.</p>
+              </div>
+              {/* Step 2 */}
+              <div className="group relative overflow-hidden p-8 bg-surface-container rounded-md border border-outline-variant/10 hover:border-secondary-fixed-dim/30 transition-all duration-500">
+                <div className="absolute -top-4 -right-4 text-8xl font-headline font-black text-surface-container-highest opacity-10 select-none">02</div>
+                <div className="mb-8 w-14 h-14 rounded-lg bg-surface-container-high flex items-center justify-center">
+                  <span className="material-symbols-outlined text-secondary-fixed-dim text-3xl">query_stats</span>
+                </div>
+                <h4 className="text-2xl font-headline font-bold mb-4">Neural Analysis</h4>
+                <p className="text-on-surface-variant leading-relaxed">Proprietary AI filters noise to identify the most capital-efficient routes based on your risk profile and slippage limits.</p>
+              </div>
+              {/* Step 3 */}
+              <div className="group relative overflow-hidden p-8 bg-surface-container rounded-md border border-outline-variant/10 hover:border-primary-container/30 transition-all duration-500">
+                <div className="absolute -top-4 -right-4 text-8xl font-headline font-black text-surface-container-highest opacity-10 select-none">03</div>
+                <div className="mb-8 w-14 h-14 rounded-lg bg-surface-container-high flex items-center justify-center">
+                  <span className="material-symbols-outlined text-primary-container text-3xl">bolt</span>
+                </div>
+                <h4 className="text-2xl font-headline font-bold mb-4">Atomic Execution</h4>
+                <p className="text-on-surface-variant leading-relaxed">Immediate deployment via Move-native flash executors. Zero gas wastage through optimized parallel transactions.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Security Section */}
+        <section className="py-32 px-6">
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-16 items-center">
+            <div className="flex-1">
+              <img alt="Cybersecurity Abstract" className="rounded-md opacity-60 grayscale hover:grayscale-0 transition-all duration-700 w-full aspect-video object-cover border border-outline-variant/20 shadow-2xl" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7iFrVlpzkhyduJx2g8so7ouuM304hYagfFStIf-Sj_2NBtVnEHlbp8y90mumYSpBgA8B2DkLPqJ86gIP-PTZm3dCWZ2evuYzrzhWFXy9XVe08hxdfhR4WuO5FMxpaXDpTIZV5-gtkQY1gaCXhkaFiN2TmLoxzdZHphC-c7e4M4ijZiw9y2Te0JeOG8uGvpKtr0486ZNR3GndgKf9LIS8zpAHhF366MlTq23JeeCI3urYgMye_qJkZYiXWPrcoTh6XnGEVbnotPuA" />
+            </div>
+            <div className="flex-1 space-y-8">
+              <span className="text-primary-container font-label uppercase tracking-widest text-sm">Bulletproof Infrastructure</span>
+              <h2 className="text-5xl font-headline font-bold tracking-tighter">Immutable Proof, <br />Total Security.</h2>
+              <p className="text-lg text-on-surface-variant">Our smart contracts are built using the Move language, inherently preventing common exploits like re-entrancy and double-spending through formal verification.</p>
+              <ul className="space-y-4">
+                <li className="flex items-center gap-4">
+                  <div className="w-6 h-6 rounded-full bg-secondary-container/20 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-secondary-fixed-dim text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                  </div>
+                  <span className="text-on-surface">Audited by CertiK & Quantstamp</span>
+                </li>
+                <li className="flex items-center gap-4">
+                  <div className="w-6 h-6 rounded-full bg-secondary-container/20 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-secondary-fixed-dim text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                  </div>
+                  <span className="text-on-surface">Non-Custodial Multi-Sig Governance</span>
+                </li>
+                <li className="flex items-center gap-4">
+                  <div className="w-6 h-6 rounded-full bg-secondary-container/20 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-secondary-fixed-dim text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                  </div>
+                  <span className="text-on-surface">Zero Gas Execution Efficiency</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* Ecosystem Logos */}
+        <section className="pb-32 px-6">
+          <div className="max-w-7xl mx-auto text-center">
+            <p className="text-xs font-label uppercase tracking-[0.5em] text-on-surface-variant/60 mb-12">Integrated Protocols</p>
+            <div className="flex flex-wrap justify-center items-center gap-12 md:gap-24 opacity-40 grayscale hover:opacity-100 hover:grayscale-0 transition-all">
+              <div className="text-2xl font-black font-headline tracking-tighter">OneDEX</div>
+              <div className="text-2xl font-black font-headline tracking-tighter">OneVault</div>
+              <div className="text-2xl font-black font-headline tracking-tighter">OnePredict</div>
+              <div className="text-2xl font-black font-headline tracking-tighter">OneRWA</div>
+              <div className="text-2xl font-black font-headline tracking-tighter">OneTransfer</div>
+            </div>
+          </div>
+        </section>
+
+        {/* Final CTA Banner */}
+        <section className="px-6 mb-32">
+          <div className="max-w-7xl mx-auto bg-gradient-to-r from-surface-container-high to-surface-container-lowest p-12 md:p-24 rounded-md relative overflow-hidden border border-outline-variant/10">
+            <div className="absolute -right-24 -bottom-24 w-96 h-96 bg-primary-container/10 rounded-full blur-[100px]"></div>
+            <div className="relative z-10 text-center space-y-8">
+              <h2 className="text-4xl md:text-7xl font-headline font-bold tracking-tighter">Ready to unleash your <br />first Hunter?</h2>
+              <p className="text-on-surface-variant max-w-xl mx-auto text-lg leading-relaxed">Join the autonomous yield revolution. No management, just pure efficiency on OneChain.</p>
+              <div className="flex flex-wrap justify-center gap-6">
+                <Link to="/dashboard">
+                  <button className="bg-primary-container text-on-primary px-12 py-5 rounded-md font-bold text-xl hover:scale-105 transition-transform">Launch OneNomad</button>
+                </Link>
+                <Link to="/docs">
+                  <button className="bg-surface-container-highest/50 backdrop-blur-md px-12 py-5 rounded-md font-bold text-xl hover:bg-surface-container-highest transition-colors">Documentation</button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* Footer Shell */}
+      <footer className="w-full py-12 border-t border-[#3a494b]/20 bg-[#201f1f]">
+        <div className="flex flex-col md:flex-row justify-between items-center px-8 max-w-7xl mx-auto gap-6 font-body text-sm tracking-widest uppercase">
+          <div className="text-lg font-black text-[#e5e2e1]">
+            ONENOMAD
+          </div>
+          <div className="flex gap-8 text-[#b9cacb]">
+            <a className="hover:text-[#00f3ff] transition-colors duration-200" href="#" target="_blank" rel="noopener noreferrer">Twitter</a>
+            <a className="hover:text-[#00f3ff] transition-colors duration-200" href="#" target="_blank" rel="noopener noreferrer">Discord</a>
+            <a className="hover:text-[#00f3ff] transition-colors duration-200" href="#" target="_blank" rel="noopener noreferrer">Github</a>
+            <Link className="hover:text-[#00f3ff] transition-colors duration-200" to="/docs">Whitepaper</Link>
+          </div>
+          <div className="text-[#b9cacb] opacity-100 hover:opacity-80">
+            © 2026 ONENOMAD. AUTONOMOUS YIELD PROTOCOL.
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}

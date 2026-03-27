@@ -1,0 +1,13 @@
+[package]
+name = "onenomad"
+edition = "2024.beta"
+
+[dependencies]
+
+[addresses]
+onenomad = "0x0"
+one = "0x2"
+
+[dev-dependencies]
+
+[dev-addresses]

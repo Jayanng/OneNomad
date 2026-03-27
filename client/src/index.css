@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #131313;
+  color: #e5e2e1;
+  font-family: 'Manrope', sans-serif;
+}
+
+.glass-panel {
+  background: rgba(32, 31, 31, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(58, 73, 75, 0.2);
+}
+
+.glow-cyan {
+  box-shadow: 0 0 15px rgba(0, 243, 255, 0.15);
+}
+
+.text-glow-cyan {
+  text-shadow: 0 0 8px rgba(0, 243, 255, 0.5);
+}
+
+.neural-grid {
+  background-image: radial-gradient(circle at 2px 2px, rgba(58, 73, 75, 0.15) 1px, transparent 0);
+  background-size: 40px 40px;
+}
+
+.hunter-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.1); }
+}
+
+.font-headline {
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.font-body {
+  font-family: 'Manrope', sans-serif;
+}
+
+.glow-text {
+  text-shadow: 0 0 12px rgba(0, 243, 255, 0.4);
+}
+
+.hunter-glow {
+  box-shadow: 0 0 20px rgba(0, 243, 255, 0.08);
+}
+
+.active-glow {
+  box-shadow: 0 0 25px rgba(0, 243, 255, 0.12);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #3a494b;
+  border-radius: 4px;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #131313;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3a494b;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00f3ff50;
+}
+
+/* ── Confetti ─────────────────────────────────────────────── */
+@keyframes confettiFall {
+  0%   { transform: translateY(-20px) rotate(0deg);   opacity: 1; }
+  80%  { opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* ── Toast slide-in ───────────────────────────────────────── */
+@keyframes slideInRight {
+  from { transform: translateX(110%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes slideOutRight {
+  from { transform: translateX(0);    opacity: 1; }
+  to   { transform: translateX(110%); opacity: 0; }
+}
+
+.toast-enter { animation: slideInRight 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.toast-exit  { animation: slideOutRight 0.3s ease-in forwards; }
+
+/* ── Success pop-in ───────────────────────────────────────── */
+@keyframes popIn {
+  0%   { transform: scale(0.85) translateY(16px); opacity: 0; }
+  60%  { transform: scale(1.03) translateY(-2px); }
+  100% { transform: scale(1)    translateY(0);    opacity: 1; }
+}
+
+.pop-in { animation: popIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
