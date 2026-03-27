@@ -15,6 +15,11 @@ DeFi yield opportunities are time-sensitive. APY rates across liquidity pools sh
 Most people either leave their funds in one pool and miss better opportunities, or they manually rebalance too slowly and too infrequently to make a real difference. OneNomad solves this by replacing the human with an always-on AI agent that never sleeps, never panics, and always follows clear, auditable rules.
 
 ---
+## Project Overview
+
+OneNomad is a fully autonomous AI-powered DeFi agent deployed on OneChain testnet. It monitors liquidity pool yields in real time, uses large language models to make intelligent rebalancing decisions, and executes on-chain transactions automatically — without any human intervention. Every decision is logged, every transaction is verifiable on-chain, and a live WebSocket
+dashboard gives users full visibility into what the agent is doing and why.
+
 
 ## How It Works
 
