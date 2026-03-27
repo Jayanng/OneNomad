@@ -112,28 +112,26 @@ async function buildPTB(
   if (needsSwap) {
     console.log(`[txBuilder] Token pair differs (${source.tokenA} -> ${target.tokenA}).`);
     console.log(`[txBuilder] Simulating swap by withdrawing ${target.tokenA} from wallet and returning ${source.tokenA}.`);
-    
+
     // 1. Send the withdrawn source coin back to the user
     const senderStr = getKeypair().getPublicKey().toSuiAddress();
     tx.transferObjects([withdrawResult], tx.pure.address(senderStr));
 
-    // 2. Find a coin of the target token type in the user's wallet to use for deposit
-    const coins = await client.getCoins({
-      owner: senderStr,
-      coinType: target.tokenA,
-    });
-    
-    if (coins.data.length === 0) {
-      throw new Error(`Cannot simulate swap: no ${target.tokenA} coins found in wallet ${senderStr}`);
+    // 2. Split deposit amount from the gas coin (tx.gas = OCT) if target is OCT,
+    //    otherwise find a non-gas coin of the target type in the wallet.
+    const OCT_TYPE = "0x2::oct::OCT";
+    if (target.tokenA === OCT_TYPE) {
+      // OCT is the gas coin — use tx.gas directly to avoid "no valid gas coins" conflict
+      const [splitCoin] = tx.splitCoins(tx.gas, [tx.pure.u64(100)]);
+      depositArg = splitCoin as any;
+    } else {
+      const coins = await client.getCoins({ owner: senderStr, coinType: target.tokenA });
+      if (coins.data.length === 0) {
+        throw new Error(`Cannot simulate swap: no ${target.tokenA} coins found in wallet ${senderStr}`);
+      }
+      const [splitCoin] = tx.splitCoins(tx.object(coins.data[0].coinObjectId), [tx.pure.u64(100)]);
+      depositArg = splitCoin as any;
     }
-
-    // Use the first available coin
-    const targetCoinId = coins.data[0].coinObjectId;
-    
-    // The pool needs a Coin object; we split a small 100-MIST chunk off our main coin array.
-    // splitCoins returns an array of TransactionResult, we take the first element.
-    const splitCoins = tx.splitCoins(tx.object(targetCoinId), [tx.pure.u64(100)]);
-    depositArg = splitCoins[0] as any;
   }
 
   // ── Step 3: Deposit into target pool ───────────────────────────────────────
