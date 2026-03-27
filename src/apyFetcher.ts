@@ -130,7 +130,8 @@ function getMockAPYs(): PoolInfo[] {
 }
 
 function getMockForPool(entry: PoolRegistryEntry): PoolInfo {
-  const seed = Math.floor(Date.now() / 60_000);
+  const intervalMs = parseInt(process.env.CRON_INTERVAL_SEC ?? "60", 10) * 1000;
+  const seed = Math.floor(Date.now() / intervalMs);
   const idx = POOL_REGISTRY.indexOf(entry);
   const safeIdx = idx >= 0 ? idx : 0;
 

@@ -18,7 +18,7 @@ const initialConfig   = db.getConfig();
 const RPC_URL          = process.env.ONECHAIN_RPC_URL ?? getFullnodeUrl("testnet");
 let DRY_RUN             = initialConfig.dryRun ?? (process.env.DRY_RUN === "true"); // default false — env var controls
 let AGENT_THRESHOLD    = initialConfig.threshold ?? 1.5;
-const CRON_SECS        = parseInt(process.env.CRON_INTERVAL_SEC ?? "60", 10);
+const CRON_SECS        = parseInt(process.env.CRON_INTERVAL_SEC ?? "15", 10);
 const CRON_EXPR        = `*/${CRON_SECS} * * * * *`; // every N seconds
 const GAS_BUDGET_MIST  = parseInt(process.env.GAS_BUDGET_MIST ?? "10000000", 10); // 0.01 OCT per tx
 const MIN_GAS_BALANCE  = GAS_BUDGET_MIST * 5;         // 0.05 OCT — must cover at least 5 cycles
