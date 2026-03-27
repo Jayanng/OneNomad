@@ -16,7 +16,7 @@ const POSITION_OBJ_ID = process.env.POSITION_OBJECT_ID!;
 // ── Config ────────────────────────────────────────────────────────────────────
 const initialConfig   = db.getConfig();
 const RPC_URL          = process.env.ONECHAIN_RPC_URL ?? getFullnodeUrl("testnet");
-let DRY_RUN             = initialConfig.dryRun ?? (process.env.DRY_RUN !== "false"); // default true — safe
+let DRY_RUN             = initialConfig.dryRun ?? (process.env.DRY_RUN === "true"); // default false — env var controls
 let AGENT_THRESHOLD    = initialConfig.threshold ?? 1.5;
 const CRON_SECS        = parseInt(process.env.CRON_INTERVAL_SEC ?? "60", 10);
 const CRON_EXPR        = `*/${CRON_SECS} * * * * *`; // every N seconds
@@ -93,7 +93,7 @@ const monitor = new EventMonitor(client);
 
 // ── Agent running state ───────────────────────────────────────────────────────
 
-let agentRunning = initialConfig.isRunning ?? false;
+let agentRunning = initialConfig.isRunning ?? true; // default true — auto-start on fresh deploy
 let isCycleRunning = false; // concurrency guard
 let cronTask: cron.ScheduledTask | null = null;
 
