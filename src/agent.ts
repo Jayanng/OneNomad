@@ -373,16 +373,11 @@ async function runAgentCycle(): Promise<void> {
         // uses the correct version of the Position object.
         await syncPositionsFromChain(pools);
         broadcastPositions(pools);
-        // Verify on-chain events
+        // Verify on-chain events (log only — don't re-broadcast as txResult
+        // because the frontend would treat the string payload as a failed tx)
         const events = await monitor.getTransactionEvents(txResult.digest);
         events.forEach(ev => {
-          const formatted = monitor.formatEvent(ev);
-          console.log(`[agent] ${formatted}`);
-          broadcast({
-            event: "txResult",
-            timestamp: Date.now(),
-            data: formatted,
-          });
+          console.log(`[agent] ${monitor.formatEvent(ev)}`);
         });
       } else {
         // Dry-run — no digest; use in-memory math (no chain state changed)

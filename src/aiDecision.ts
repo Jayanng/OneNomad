@@ -138,31 +138,33 @@ export async function getAIDecision(pools: PoolInfo[], currentPositions: Positio
     return safeHoldDecision("all-ai-providers-failed");
   })();
 
-  // 4. Enforce the rule programmatically to handle LLM arithmetic errors
-  if (finalDecision.action === "rebalance") {
-    const src = pools.find(p => p.id === finalDecision.sourcePoolId);
-    const tgt = pools.find(p => p.id === finalDecision.targetPoolId);
-    
+  // 4. Enforce the rule programmatically to handle LLM arithmetic errors.
+  //    Do NOT return early here — fall through to step 5 so the forced-rebalance
+  //    check runs even when the AI suggested a bad move that was overridden to hold.
+  let workingDecision = finalDecision;
+
+  if (workingDecision.action === "rebalance") {
+    const src = pools.find(p => p.id === workingDecision.sourcePoolId);
+    const tgt = pools.find(p => p.id === workingDecision.targetPoolId);
+
     if (src && tgt) {
       const gain = tgt.apy - src.apy;
       if (gain < threshold) {
         console.warn(`[aiDecision] ⚠ AI suggested rebalance with insufficient gain (${gain.toFixed(2)}%). Threshold is ${threshold}%. Overriding to HOLD.`);
         const overridden = safeHoldDecision(`insufficient-gain-override (${gain.toFixed(2)}% < ${threshold}%)`);
-        overridden.modelUsed = finalDecision.modelUsed;
-        logDecision(overridden, pools);
-        return overridden;
+        overridden.modelUsed = workingDecision.modelUsed;
+        workingDecision = overridden; // fall through to step 5
       }
     } else {
       console.warn(`[aiDecision] ⚠ AI suggested invalid pool IDs. Overriding to HOLD.`);
       const overridden = safeHoldDecision("invalid-pool-ids-returned");
-      overridden.modelUsed = finalDecision.modelUsed;
-      logDecision(overridden, pools);
-      return overridden;
+      overridden.modelUsed = workingDecision.modelUsed;
+      workingDecision = overridden; // fall through to step 5
     }
   }
 
   // 5. Programmatic override: if AI holds but a better pool exists above threshold, force rebalance.
-  if (finalDecision.action === "hold" && currentPositions.length > 0) {
+  if (workingDecision.action === "hold" && currentPositions.length > 0) {
     const MAX_ALLOWED_APY = 50;
     // Find the pool we're currently in (highest allocatedPct)
     const topPosition = currentPositions.reduce((a, b) => a.allocatedPct > b.allocatedPct ? a : b);
@@ -186,7 +188,7 @@ export async function getAIDecision(pools: PoolInfo[], currentPositions: Positio
           amountPercent: 100,
           reasoning: `Programmatic override: moving from ${currentPool.apy.toFixed(2)}% to ${bestAlternative.apy.toFixed(2)}% (+${(bestAlternative.apy - currentPool.apy).toFixed(2)}% gain)`,
           confidence: 0.95,
-          modelUsed: `${finalDecision.modelUsed}+override`,
+          modelUsed: `${workingDecision.modelUsed}+override`,
         };
         logDecision(overridden, pools);
         return overridden;
@@ -194,8 +196,8 @@ export async function getAIDecision(pools: PoolInfo[], currentPositions: Positio
     }
   }
 
-  logDecision(finalDecision, pools);
-  return finalDecision;
+  logDecision(workingDecision, pools);
+  return workingDecision;
 }
 
 // ── Provider calls ────────────────────────────────────────────────────────────
