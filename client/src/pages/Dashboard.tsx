@@ -14,7 +14,7 @@ export default function Dashboard() {
   const { isConnected, address, balance, connect, disconnect } = useOneWallet();
   const { name: oneIdName } = useOneID(address);
   const displayName = oneIdName ?? (address ? shortenAddress(address) : null);
-  const { pools, lastDecision, lastTx, txHistory, decisionHistory, safetyResult, wsConnected, heartbeat, agentRunning, wsLatency, lastUpdateAt } = useAgentWS();
+  const { pools, positions, lastDecision, lastTx, txHistory, decisionHistory, safetyResult, wsConnected, heartbeat, agentRunning, wsLatency, lastUpdateAt } = useAgentWS();
   const [optimisticDryRun, setOptimisticDryRun] = useState<boolean | null>(null);
   const isDryRun = optimisticDryRun ?? (heartbeat?.dryRun ?? false);
   useEffect(() => { setOptimisticDryRun(null); }, [heartbeat?.dryRun]);
@@ -322,6 +322,23 @@ export default function Dashboard() {
     const type = safetyResult.approved ? "SUCCESS" : "WARNING";
     setLogs((prev) => [{ time: t, msg, type }, ...prev].slice(0, 50));
   }, [safetyResult]);
+
+  // Log current on-chain positions into Agent Brain whenever they update
+  const prevPositionsRef = useRef<typeof positions>([]);
+  useEffect(() => {
+    if (positions === prevPositionsRef.current) return;
+    prevPositionsRef.current = positions;
+    const now = new Date();
+    const t = `${now.getHours()}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`;
+    let msg: string;
+    if (positions.length === 0) {
+      msg = "[INFO] Positions: none — no active on-chain deposits";
+    } else {
+      const parts = positions.map(p => `${extractToken(p.tokenA)}/${extractToken(p.tokenB)} ${p.allocatedPct.toFixed(1)}%`);
+      msg = `[INFO] Positions: ${parts.join(" | ")}`;
+    }
+    setLogs((prev) => [{ time: t, msg, type: "INFO" }, ...prev].slice(0, 50));
+  }, [positions]);
 
   // Show real rebalance notification when a successful live tx arrives
   const prevTxNotifRef = useRef<typeof lastTx>(null);
