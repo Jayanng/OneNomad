@@ -3,9 +3,13 @@ import express from "express";
 import { createServer } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import path from "path";
+import { SuiClient, getFullnodeUrl } from "@onelabs/sui/client";
+import { Ed25519Keypair } from "@onelabs/sui/keypairs/ed25519";
 import { startAgent, setBroadcast, triggerAgentCycle, pauseAgent, resumeAgent, isAgentRunning, setDryRun, isDryRun, setThreshold, getThreshold, resetPositions } from "./agent";
 import { db } from "./db";
 import type { WSMessage } from "./types";
+
+const suiClient = new SuiClient({ url: process.env.ONECHAIN_RPC_URL ?? getFullnodeUrl("testnet") });
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
@@ -82,6 +86,32 @@ app.get("/api/agent/history", (_req, res) => {
 
 app.get("/api/agent/apy-history", (_req, res) => {
   res.json(db.getApyHistory());
+});
+
+// On-chain transaction history — reads directly from OneChain, survives restarts
+app.get("/api/agent/chain-history", async (_req, res) => {
+  try {
+    const key = process.env.PRIVATE_KEY;
+    if (!key) { res.json([]); return; }
+    const kp = Ed25519Keypair.fromSecretKey(key);
+    const addr = kp.toSuiAddress();
+    const result = await suiClient.queryTransactionBlocks({
+      filter: { FromAddress: addr },
+      options: { showEffects: true },
+      limit: 50,
+      order: "descending",
+    });
+    const txs = result.data.map(tx => ({
+      digest: tx.digest,
+      timestamp: Number(tx.timestampMs),
+      success: tx.effects?.status?.status === "success",
+      explorerUrl: `https://onescan.cc/testnet/tx/${tx.digest}`,
+    }));
+    res.json(txs);
+  } catch (err) {
+    console.error("[chain-history] RPC error:", err);
+    res.json([]);
+  }
 });
 
 app.post("/api/rpc", async (req, res) => {

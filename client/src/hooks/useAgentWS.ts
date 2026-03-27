@@ -126,11 +126,10 @@ export function useAgentWS(): UseAgentWSReturn {
       })
       .catch(err => console.error("[useAgentWS] Failed to fetch config:", err));
 
-    // Fetch rebalance history
+    // Fetch rebalance history from local DB (rich decision data for current session)
     fetch("/api/agent/history")
       .then(res => res.json())
       .then((data: any[]) => {
-        // Map raw DB entries to frontend types
         const bh: DecisionHistoryEntry[] = data.map(e => ({
           timestamp: e.timestamp,
           decision: e.decision,
@@ -138,17 +137,30 @@ export function useAgentWS(): UseAgentWSReturn {
           tx: e.tx,
         }));
         setDecisionHistory(bh.slice(0, 50));
-
         const th: TxHistoryEntry[] = data
           .filter(e => e.tx)
-          .map(e => ({
-            timestamp: e.timestamp,
-            decision: e.decision,
-            tx: e.tx,
-          }));
+          .map(e => ({ timestamp: e.timestamp, decision: e.decision, tx: e.tx }));
         setTxHistory(th.slice(0, 50));
       })
       .catch(err => console.error("[useAgentWS] Failed to fetch history:", err));
+
+    // Seed tx history from on-chain data — persists across restarts and rebalances
+    fetch("/api/agent/chain-history")
+      .then(res => res.json())
+      .then((data: any[]) => {
+        const chainTxs: TxHistoryEntry[] = data.map(e => ({
+          timestamp: e.timestamp,
+          decision: null,
+          tx: { digest: e.digest, success: e.success, dryRun: false },
+        }));
+        // Merge with any session history already loaded — deduplicate by digest
+        setTxHistory(prev => {
+          const seen = new Set(prev.map(e => e.tx.digest).filter(Boolean));
+          const fresh = chainTxs.filter(e => !seen.has(e.tx.digest));
+          return [...prev, ...fresh].sort((a, b) => b.timestamp - a.timestamp).slice(0, 50);
+        });
+      })
+      .catch(err => console.error("[useAgentWS] Failed to fetch chain history:", err));
 
     // Fetch APY history (chart data is handled in Dashboard.tsx via its own state,
     // but we could initialize a global chart state here if needed. 
